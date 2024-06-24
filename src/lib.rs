@@ -66,7 +66,7 @@ mod tests {
                 top_speed: 20.0f32,
                 acceleration: 5.0f32,
             },
-            color: "Blue".into(),
+            color: "blue".into(),
         };
         assert_eq!(baz.foo.name, "Tim");
         assert_eq!(baz.title(), "Tim");
