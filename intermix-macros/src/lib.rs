@@ -15,9 +15,9 @@ fn extract_mixin_field_map(
     let mut field_map = HashMap::new();
     if let Data::Struct(data_struct) = &mut ast.data {
         for field in data_struct.fields.iter_mut() {
-            if let Some(field_name) = &field.ident.clone() {
-                let result: Result<MixinFieldAttributes, _> = deluxe::extract_attributes(field);
-                if let Ok(value) = result {
+            let result: Result<MixinFieldAttributes, _> = deluxe::extract_attributes(field);
+            if let Ok(value) = result {
+                if let Some(field_name) = &field.ident {
                     field_map.insert(field_name.to_string(), value);
                 }
             }
@@ -33,14 +33,17 @@ fn derive_macro2(item: proc_macro2::TokenStream) -> deluxe::Result<proc_macro2::
 
     for (source_property, attrs) in field_map.into_iter() {
         for (source_method, expr) in attrs.mixin.into_iter() {
-            let property_definition = match expr {
+            let property_definition = match &expr {
                 syn::Expr::Lit(syn::ExprLit {
                     lit: syn::Lit::Str(lit_str),
                     ..
                 }) => lit_str.value(),
                 _ => "".to_string(),
             };
-            let source_method = source_method.get_ident().unwrap().to_string();
+            let source_method = source_method
+                .get_ident()
+                .ok_or_else(|| syn::Error::new_spanned(&expr, "Expected source method!"))?
+                .to_string();
             let method_name: syn::Ident;
             let return_type: syn::Type;
             if property_definition.contains(':') {
@@ -48,7 +51,12 @@ fn derive_macro2(item: proc_macro2::TokenStream) -> deluxe::Result<proc_macro2::
                     .splitn(2, ':')
                     .into_iter()
                     .collect_tuple()
-                    .expect("Expected property pair on colon");
+                    .ok_or_else(|| {
+                        syn::Error::new_spanned(
+                            &expr,
+                            format!("Expected colon in property value '{}'", property_definition),
+                        )
+                    })?;
                 method_name = syn::Ident::new(name.trim(), proc_macro2::Span::call_site());
                 return_type = syn::parse_str(type_.trim()).expect("Failed to parse type");
             } else {

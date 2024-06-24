@@ -42,11 +42,15 @@ mod tests {
         foo: Foo,
         #[mixin(top_speed = "f32")]
         bar: Bar,
+        color: String,
     }
 
     impl Baz {
         pub fn math(&self) -> f32 {
             self.foo.height() as f32 * self.bar.acceleration()
+        }
+        pub fn color(&self) -> &String {
+            &self.color
         }
     }
 
@@ -62,11 +66,13 @@ mod tests {
                 top_speed: 20.0f32,
                 acceleration: 5.0f32,
             },
+            color: "Blue".into(),
         };
         assert_eq!(baz.foo.name, "Tim");
         assert_eq!(baz.title(), "Tim");
         assert_eq!(baz.age(), 32);
         assert_eq!(baz.top_speed(), 20.0f32);
         assert_eq!(baz.math(), 300.0f32);
+        assert_eq!(baz.color(), "blue");
     }
 }
