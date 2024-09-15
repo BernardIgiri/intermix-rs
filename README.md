@@ -1,7 +1,3 @@
-TODO List
+# Intermix Library
 
-- [ ] Derive Intermix macro
-- [ ] Add Attributes for #[mixin]
-  - [ ] skip = array
-  - [ ] include = array
-  - [ ] rename = array map
+This project is mostly a learning exercise for custom macro development in Rust.
